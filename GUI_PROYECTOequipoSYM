@@ -5,7 +5,7 @@ from tkinter import ttk
 # Ventana principal
 # ==========================================
 ventana = tk.Tk()
-ventana.title("Framework Profesional - Tkinter")
+ventana.title("MOVILIDAD DE RUTAS ")
 ventana.geometry("900x550")
 ventana.configure(bg="#F2F2F2")
 
@@ -21,7 +21,7 @@ color_content = "#FFFFFF"
 encabezado = tk.Frame(ventana, bg=color_header, height=70)
 encabezado.pack(fill="x")
 
-titulo = tk.Label(encabezado, text="Framework Profesional GUI", bg=color_header, fg="green", font=("Segoe UI", 20, "bold"))
+titulo = tk.Label(encabezado, text="MOVILIDAD DE RUTAS", bg=color_header, fg="green", font=("Segoe UI", 20, "bold"))
 titulo.place(x=20, y=15)
 
 # ==========================================
