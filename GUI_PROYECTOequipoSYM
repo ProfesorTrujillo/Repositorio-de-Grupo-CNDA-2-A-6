@@ -1,0 +1,108 @@
+import tkinter as tk
+from tkinter import ttk
+
+# ==========================================
+# Ventana principal
+# ==========================================
+ventana = tk.Tk()
+ventana.title("Framework Profesional - Tkinter")
+ventana.geometry("900x550")
+ventana.configure(bg="#F2F2F2")
+
+# Colores principales
+color_header = "#1F3C88"
+color_menu = "#162447"
+color_button = "#1F78D1"
+color_content = "#FFFFFF"
+
+# ==========================================
+# Encabezado
+# ==========================================
+encabezado = tk.Frame(ventana, bg=color_header, height=70)
+encabezado.pack(fill="x")
+
+titulo = tk.Label(encabezado, text="Framework Profesional GUI", bg=color_header, fg="green", font=("Segoe UI", 20, "bold"))
+titulo.place(x=20, y=15)
+
+# ==========================================
+# Menú lateral
+# ==========================================
+menu = tk.Frame(ventana, bg=color_menu, width=200)
+menu.pack(side="left", fill="y")
+
+btn_dash = tk.Button(menu, text="Dashboard", bg=color_menu, fg="white", relief="flat", font=("Segoe UI", 12))
+btn_dash.pack(fill="x", pady=8)
+
+btn_ajustes = tk.Button(menu, text="Ajustes", bg=color_menu, fg="blue", relief="flat", font=("Segoe UI", 12))
+btn_ajustes.pack(fill="x", pady=8)
+
+btn_ayuda = tk.Button(menu, text="Ayuda", bg=color_menu, fg="white", relief="flat", font=("Segoe UI", 12))
+btn_ayuda.pack(fill="x", pady=8)
+
+# ==========================================
+# Área de contenido
+# ==========================================
+contenido = tk.Frame(ventana, bg=color_content)
+contenido.pack(side="left", fill="both", expand=True)
+
+titulo_seccion = tk.Label(contenido, text="Formulario de Ejemplo", bg=color_content, fg="#333333", font=("Segoe UI", 16, "bold"))
+titulo_seccion.place(x=30, y=20)
+
+# ==========================================
+# Widgets del formulario
+# ==========================================
+
+# Etiqueta + Entry
+lbl_nombre = tk.Label(contenido, text="Nombre:", bg=color_content, font=("Segoe UI", 12))
+lbl_nombre.place(x=30, y=80)
+
+entrada_nombre = tk.Entry(contenido, width=30, font=("Segoe UI", 11))
+entrada_nombre.place(x=120, y=80)
+
+# Etiqueta + Entry correo
+lbl_correo = tk.Label(contenido, text="Correo:", bg=color_content, font=("Segoe UI", 12))
+lbl_correo.place(x=30, y=120)
+
+entrada_correo = tk.Entry(contenido, width=30, font=("Segoe UI", 11))
+entrada_correo.place(x=120, y=120)
+
+# RadioButtons
+lbl_genero = tk.Label(contenido, text="Género:", bg=color_content, font=("Segoe UI", 12))
+lbl_genero.place(x=30, y=170)
+
+genero = tk.StringVar()
+rb_hombre = tk.Radiobutton(contenido, text="Hombre", variable=genero, value="hombre", bg=color_content, font=("Segoe UI", 11))
+rb_hombre.place(x=120, y=170)
+
+rb_mujer = tk.Radiobutton(contenido, text="Mujer", variable=genero, value="mujer", bg=color_content, font=("Segoe UI", 11))
+rb_mujer.place(x=200, y=170)
+
+rb_otro = tk.Radiobutton(contenido, text="Otro", variable=genero, value="otro", bg=color_content, font=("Segoe UI", 11))
+rb_otro.place(x=260, y=170)
+
+# CheckButtons
+lbl_intereses = tk.Label(contenido, text="Intereses:", bg=color_content, font=("Segoe UI", 12))
+lbl_intereses.place(x=30, y=210)
+
+chk1 = tk.Checkbutton(contenido, text="Tecnología", bg=color_content, font=("Segoe UI", 11))
+chk1.place(x=120, y=210)
+
+chk2 = tk.Checkbutton(contenido, text="Ciencia", bg=color_content, font=("Segoe UI", 11))
+chk2.place(x=230, y=210)
+
+chk3 = tk.Checkbutton(contenido, text="Arte", bg=color_content, font=("Segoe UI", 11))
+chk3.place(x=310, y=210)
+
+# Caja de comentarios
+lbl_comentarios = tk.Label(contenido, text="Comentarios:", bg=color_content, font=("Segoe UI", 12))
+lbl_comentarios.place(x=30, y=260)
+
+caja_comentarios = tk.Text(contenido, width=50, height=6, font=("Segoe UI", 11), bd=2, relief="solid")
+caja_comentarios.place(x=30, y=290)
+
+# Botón principal
+btn_guardar = tk.Button(contenido, text="Guardar Datos", bg=color_button, fg="white", font=("Segoe UI", 12, "bold"), width=20)
+btn_guardar.place(x=300, y=420)
+
+# ==========================================
+ventana.mainloop()
