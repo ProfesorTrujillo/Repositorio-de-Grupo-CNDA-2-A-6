@@ -86,7 +86,7 @@ frame_ruta.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
 
 tk.Label(frame_ruta, text="Ruta:", bg=blanco, fg=texto).grid(row=0, column=0, sticky="w")
 
-combo_ruta = ttk.Combobox(frame_ruta, values=["Ruta 1", "Ruta 2", "Ruta 3", "Ruta 4", "Ruta 5", "Ruta 6", "Ruta 7", "Ruta 8", "Ruta 9", "Ruta 11", "Ruta 12", "Ruta 14", "Ruta 16", "Ruta 18", "Ruta 19", "Ruta 23", "Ruta 24", "Ruta 25", "Ruta 27", "Ruta 28", "Ruta 29", "Ruta 30", "Ruta 34", "Ruta 35", "Ruta 36", "Ruta 37", "Ruta 38", "Ruta 39", "Ruta 42", "Ruta 45", "Ruta 46", "Ruta 48", "Ruta 50", "Ruta 51", Ruta 50B", "Ruta UTR", "Ruta 52", "Ruta UP", "Ruta 43 Norte", "Ruta 43 Sur", "Ruta 10 Norte", "Ruta 10 Sur", "Ruta 40 Norte", "Ruta 40 Sur", "Ruta 20 Norte", "Ruta 20 Sur", "Ruta 41 Alameda", "Ruta 41 Penal", "Ruta 33", "Ruta 47"])
+combo_ruta = ttk.Combobox(frame_ruta, values=["Ruta 1", "Ruta 2", "Ruta 3", "Ruta 4", "Ruta 5", "Ruta 6", "Ruta 7", "Ruta 8", "Ruta 9", "Ruta 11", "Ruta 12", "Ruta 14", "Ruta 16", "Ruta 18", "Ruta 19", "Ruta 23", "Ruta 24", "Ruta 25", "Ruta 27", "Ruta 28", "Ruta 29", "Ruta 30", "Ruta 34", "Ruta 35", "Ruta 36", "Ruta 37", "Ruta 38", "Ruta 39", "Ruta 42", "Ruta 45", "Ruta 46", "Ruta 48", "Ruta 50", "Ruta 51", "Ruta 50B", "Ruta UTR", "Ruta 52", "Ruta UP", "Ruta 43 Norte", "Ruta 43 Sur", "Ruta 10 Norte", "Ruta 10 Sur", "Ruta 40 Norte", "Ruta 40 Sur", "Ruta 20 Norte", "Ruta 20 Sur", "Ruta 41 Alameda", "Ruta 41 Penal", "Ruta 33", "Ruta 47"])
 combo_ruta.grid(row=0, column=1, padx=5, pady=5)
 
 tk.Label(frame_ruta, text="Frecuencia:", bg=blanco, fg=texto).grid(row=1, column=0, sticky="w")
