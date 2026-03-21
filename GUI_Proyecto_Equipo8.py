@@ -13,9 +13,9 @@ ventana.configure(bg="#F2F2F2") # Configuramos el fondo gris claro
 
 # Definición de colores principales
 # Colores que recuerdan al contexto institucional y de movilidad
-color_header = "#E41DC3" 
-color_menu = "#D423EB"   
-color_button = "#A50F8C" 
+color_header = "#2567B3" 
+color_menu = "#A112E9"   
+color_button = "#D320B5" 
 color_content = "#FFFFFF" # Fondo blanco para el contenido principal
 color_text_main = "#333333" # Color principal de texto
 
@@ -66,7 +66,7 @@ lbl_nombre = tk.Label(contenido, text="Nombre Completo del Solicitante:", bg=col
 lbl_nombre.place(x=35, y=85)
 
 entrada_nombre = tk.Entry(contenido, width=40, font=("Segoe UI", 11))
-entrada_nombre.place(x=290, y=85)
+entrada_nombre.place(x=305, y=85)
 
 # Etiqueta + Entry para el teléfono o contacto
 lbl_contacto = tk.Label(contenido, text="Teléfono o Correo de Contacto:", bg=color_content, font=("Segoe UI", 12))
@@ -88,7 +88,7 @@ rb_verificacion = tk.Radiobutton(contenido, text="Verificación Vehicular", vari
 rb_verificacion.place(x=440, y=175)
 
 rb_multa = tk.Radiobutton(contenido, text="Multas e Impugnaciones", variable=tipo_servicio, value="multa", bg=color_content, font=("Segoe UI", 11))
-rb_multa.place(x=630, y=175)
+rb_multa.place(x=420, y=210)
 
 rb_placas = tk.Radiobutton(contenido, text="Alta/Baja Placas", variable=tipo_servicio, value="placas", bg=color_content, font=("Segoe UI", 11))
 rb_placas.place(x=270, y=210)
@@ -120,7 +120,7 @@ caja_observaciones.place(x=35, y=400)
 
 # Botón principal para agendar la cita
 btn_agendar = tk.Button(contenido, text="Agendar Cita ", bg=color_button, fg="white", font=("Segoe UI", 13, "bold"), width=25)
-btn_agendar.place(x=600, y=520)
+btn_agendar.place(x=600, y=535)
 
 # ==========================================
 # Fin de la estructura de la interfaz
