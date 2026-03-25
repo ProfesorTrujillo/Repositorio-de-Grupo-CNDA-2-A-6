@@ -1,112 +1,147 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox
 
-# ==========================================
-# Función guardar cita
-# ==========================================
-def guardar_cita():
-    nombre = entrada_nombre.get()
-    origen = entrada_origen.get()
-    destino = entrada_destino.get()
-    fecha = entrada_fecha.get()
-    hora = entrada_hora.get()
-    transporte = tipo_transporte.get()
-
-    if nombre == "" or origen == "" or destino == "":
-        messagebox.showwarning("Error", "Completa los campos obligatorios")
-    else:
-        messagebox.showinfo("Registro exitoso",
-                            f"Cita registrada:\n\nNombre: {nombre}\nOrigen: {origen}\nDestino: {destino}\nFecha: {fecha}\nHora: {hora}\nTransporte: {transporte}")
-
-# ==========================================
-# Ventana principal
-# ==========================================
+# Crear ventana principal
 ventana = tk.Tk()
-ventana.title("Sistema de Citas - Transporte Público")
-ventana.geometry("900x550")
-ventana.configure(bg="#EAEFF2")
+ventana.title("Sistema de Transporte Público - Aguascalientes")
+ventana.geometry("600x500")
+ventana.configure(bg="#f2f2f2")
 
-# Colores
-color_header = "#1DF7E8"
-color_menu = "#358EED"
-color_button = "#1EDD27"
-color_content = "#1BF472"
+# -------- FUNCIONES --------
+def guardar_demanda():
+    nombre = entry_nombre.get()
+    ruta = entry_ruta.get()
+    pasajeros = entry_pasajeros.get()
+    horario = entry_horario.get()
 
-# ==========================================
-# Encabezado
-# ==========================================
-encabezado = tk.Frame(ventana, bg=color_header, height=70)
-encabezado.pack(fill="x")
+    if nombre and ruta and pasajeros and horario:
+        messagebox.showinfo("Registro exitoso", "Demanda registrada correctamente")
+        limpiar_campos()
+    else:
+        messagebox.showwarning("Error", "Completa todos los campos")
 
-titulo = tk.Label(encabezado, text="Sistema de Registro de Citas de Transporte", bg=color_header, fg="white", font=("Segoe UI", 18, "bold"))
-titulo.place(x=20, y=18)
+def enviar_queja():
+    texto = txt_quejas.get("1.0", tk.END)
+    if texto.strip():
+        messagebox.showinfo("Enviado", "Tu comentario fue enviado")
+        txt_quejas.delete("1.0", tk.END)
+    else:
+        messagebox.showwarning("Error", "Escribe una queja o sugerencia")
 
-# ==========================================
-# Menú lateral
-# ==========================================
-menu = tk.Frame(ventana, bg=color_menu, width=200)
-menu.pack(side="left", fill="y")
+def limpiar_campos():
+    entry_nombre.delete(0, tk.END)
+    entry_ruta.delete(0, tk.END)
+    entry_pasajeros.delete(0, tk.END)
+    entry_horario.delete(0, tk.END)
 
-tk.Label(menu, text="MENÚ", bg=color_menu, fg="white", font=("Segoe UI", 14, "bold")).pack(pady=10)
+def salir():
+    ventana.quit()
 
-tk.Button(menu, text="Registrar cita", bg=color_menu, fg="white", relief="flat", font=("Segoe UI", 12)).pack(fill="x", pady=8)
-tk.Button(menu, text="Ver citas", bg=color_menu, fg="white", relief="flat", font=("Segoe UI", 12)).pack(fill="x", pady=8)
-tk.Button(menu, text="Salir", bg=color_menu, fg="white", relief="flat", font=("Segoe UI", 12), command=ventana.quit).pack(fill="x", pady=8)
+# -------- TITULO --------
+titulo = tk.Label(
+    ventana, 
+    text="Sistema de Transporte Público", 
+    font=("Arial", 16, "bold"), 
+    bg="#f2f2f2",
+    fg="#333"
+)
+titulo.pack(pady=10)
 
-# ==========================================
-# Área de contenido
-# ==========================================
-contenido = tk.Frame(ventana, bg=color_content)
-contenido.pack(side="left", fill="both", expand=True)
+# -------- FRAME REGISTRO --------
+frame_registro = tk.LabelFrame(
+    ventana, 
+    text="Registro de Demanda", 
+    bg="#f2f2f2",
+    fg="#333",
+    padx=10, 
+    pady=10
+)
+frame_registro.pack(padx=20, pady=10, fill="both")
 
-titulo_seccion = tk.Label(contenido, text="Registro de Nueva Cita", bg=color_content, fg="#333", font=("Segoe UI", 16, "bold"))
-titulo_seccion.place(x=30, y=20)
+tk.Label(frame_registro, text="Nombre:", bg="#f2f2f2").grid(row=0, column=0, sticky="w")
+entry_nombre = tk.Entry(frame_registro)
+entry_nombre.grid(row=0, column=1)
 
-# ==========================================
-# Formulario
-# ==========================================
+tk.Label(frame_registro, text="Ruta:", bg="#f2f2f2").grid(row=1, column=0, sticky="w")
+entry_ruta = tk.Entry(frame_registro)
+entry_ruta.grid(row=1, column=1)
 
-# Nombre
-tk.Label(contenido, text="Nombre:", bg=color_content, font=("Segoe UI", 12)).place(x=30, y=80)
-entrada_nombre = tk.Entry(contenido, width=30, font=("Segoe UI", 11))
-entrada_nombre.place(x=150, y=80)
+tk.Label(frame_registro, text="Pasajeros:", bg="#f2f2f2").grid(row=2, column=0, sticky="w")
+entry_pasajeros = tk.Entry(frame_registro)
+entry_pasajeros.grid(row=2, column=1)
 
-# Origen
-tk.Label(contenido, text="Origen:", bg=color_content, font=("Segoe UI", 12)).place(x=30, y=120)
-entrada_origen = tk.Entry(contenido, width=30, font=("Segoe UI", 11))
-entrada_origen.place(x=150, y=120)
+tk.Label(frame_registro, text="Horario:", bg="#f2f2f2").grid(row=3, column=0, sticky="w")
+entry_horario = tk.Entry(frame_registro)
+entry_horario.grid(row=3, column=1)
 
-# Destino
-tk.Label(contenido, text="Destino:", bg=color_content, font=("Segoe UI", 12)).place(x=30, y=160)
-entrada_destino = tk.Entry(contenido, width=30, font=("Segoe UI", 11))
-entrada_destino.place(x=150, y=160)
+btn_guardar = tk.Button(
+    frame_registro, 
+    text="Guardar", 
+    command=guardar_demanda,
+    bg="#cccccc"
+)
+btn_guardar.grid(row=4, column=0, pady=10)
 
-# Fecha
-tk.Label(contenido, text="Fecha:", bg=color_content, font=("Segoe UI", 12)).place(x=30, y=200)
-entrada_fecha = tk.Entry(contenido, width=20, font=("Segoe UI", 11))
-entrada_fecha.place(x=150, y=200)
+btn_limpiar = tk.Button(
+    frame_registro, 
+    text="Limpiar", 
+    command=limpiar_campos,
+    bg="#cccccc"
+)
+btn_limpiar.grid(row=4, column=1)
 
-# Hora
-tk.Label(contenido, text="Hora:", bg=color_content, font=("Segoe UI", 12)).place(x=30, y=240)
-entrada_hora = tk.Entry(contenido, width=20, font=("Segoe UI", 11))
-entrada_hora.place(x=150, y=240)
+# -------- FRAME RUTAS --------
+frame_rutas = tk.LabelFrame(
+    ventana, 
+    text="Rutas y Horarios", 
+    bg="#f2f2f2",
+    fg="#333",
+    padx=10, 
+    pady=10
+)
+frame_rutas.pack(padx=20, pady=10, fill="both")
 
-# Tipo de transporte
-tk.Label(contenido, text="Transporte:", bg=color_content, font=("Segoe UI", 12)).place(x=30, y=280)
+info_rutas = tk.Label(
+    frame_rutas,
+    text="Ruta 1: Centro - Norte | 6:00 - 22:00\n"
+         "Ruta 2: Sur - Centro | 5:30 - 21:30\n"
+         "Ruta 3: Oriente - Poniente | 6:15 - 22:15",
+    bg="#f2f2f2",
+    justify="left"
+)
+info_rutas.pack()
 
-tipo_transporte = tk.StringVar()
-combo = ttk.Combobox(contenido, textvariable=tipo_transporte, values=["Autobús", "Metro", "Taxi", "Combi"], state="readonly")
-combo.place(x=150, y=280)
-combo.current(0)
+# -------- FRAME QUEJAS --------
+frame_quejas = tk.LabelFrame(
+    ventana, 
+    text="Quejas y Sugerencias", 
+    bg="#f2f2f2",
+    fg="#333",
+    padx=10, 
+    pady=10
+)
+frame_quejas.pack(padx=20, pady=10, fill="both")
 
-# Comentarios
-tk.Label(contenido, text="Notas:", bg=color_content, font=("Segoe UI", 12)).place(x=30, y=320)
-caja = tk.Text(contenido, width=50, height=5, font=("Segoe UI", 11))
-caja.place(x=30, y=350)
+txt_quejas = tk.Text(frame_quejas, height=4)
+txt_quejas.pack()
 
-# Botón guardar
-btn_guardar = tk.Button(contenido, text="Guardar Cita", bg=color_button, fg="white", font=("Segoe UI", 12, "bold"), width=20, command=guardar_cita)
-btn_guardar.place(x=300, y=460)
+btn_enviar = tk.Button(
+    frame_quejas, 
+    text="Enviar", 
+    command=enviar_queja,
+    bg="#cccccc"
+)
+btn_enviar.pack(pady=5)
 
-# ==========================================
+# -------- BOTON SALIR --------
+btn_salir = tk.Button(
+    ventana, 
+    text="Salir", 
+    command=salir,
+    bg="#999999",
+    fg="white"
+)
+btn_salir.pack(pady=10)
+
+# Ejecutar ventana
 ventana.mainloop()
