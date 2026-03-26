@@ -1,6 +1,6 @@
-videojuego1=input("Dame nombre del primer videojuego: ")
-videojuego2=input("Dame nombre del segundo videojuego: ")
-videojuego3=input("Dame nombre del tercer videojuego: ")
+videojuegos=[]
 
-videojuego=[videojuego1 , videojuego2 , videojuego3 ]
-print(videojuego)
+for i in range(3):
+    videojuego=input("Ingresa tu Videojuego: ")
+    videojuegos.append(videojuego)
+print("Tus juegos son", videojuegos )
