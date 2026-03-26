@@ -1,4 +1,4 @@
-# 1. Iniciamos con la lista vacía
+# 1. Iniciamos con la lista vacía 
 videojuegos = []
 opcion = 0
 
