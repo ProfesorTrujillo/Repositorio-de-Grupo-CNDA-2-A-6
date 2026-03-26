@@ -58,3 +58,4 @@ while True:
         break
     else:
         print("Opción no válida. Por favor, ingrese un número del 1 al 5.")
+        
