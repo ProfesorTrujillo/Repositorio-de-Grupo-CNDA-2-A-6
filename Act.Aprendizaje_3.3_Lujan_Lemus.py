@@ -1,7 +1,7 @@
 
 
 # 1. Crear la lista vacía
-videojuegos = []
+videojuegos = [] 
 
 # 2. Variable para el menú
 opcion = 0
