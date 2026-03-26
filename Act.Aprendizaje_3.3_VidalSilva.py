@@ -46,6 +46,6 @@ while opcion != 5:
 
     elif opcion == 5:
         print("Programa finalizado")
-        
+
     elif opcion == 5:
         print("Programa finalizado")
