@@ -1,4 +1,4 @@
-# Crear la lista vacía
+# Crear la lista vacía 
 videojuegos = []
 opcion = 0
 
