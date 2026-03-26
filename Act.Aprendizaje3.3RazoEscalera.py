@@ -31,7 +31,7 @@ while seleccion != 5:
             print("Videojuego encontrado.")
         else:
             print("No se encuentra en la lista.")
-            
+     
     elif seleccion == 4:
         nombre_eliminar = input("Nombre del videojuego a eliminar: ")
         if nombre_eliminar in videojuegos:
