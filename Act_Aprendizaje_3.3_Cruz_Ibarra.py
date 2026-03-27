@@ -1,5 +1,5 @@
 opcion = 0
-videojuegos = []
+videojuegos = [] 
 
 while opcion != 5:
     print("\n----- MENÚ -----")
