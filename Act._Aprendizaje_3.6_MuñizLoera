@@ -1,0 +1,39 @@
+def cambio(monto, monedas):
+    dp = [float('inf')] * (monto + 1)
+    dp[0] = 0
+    for i in range(1, monto + 1):
+        for m in monedas:
+            if m <= i:
+                dp[i] = min(dp[i], dp[i - m] + 1)
+    if dp[monto] == float('inf'):
+        return None
+    desglose = []
+    i = monto
+    while i > 0:
+        for m in monedas:
+            if m <= i and dp[i] == dp[i - m] + 1:
+                desglose.append(m)
+                i -= m
+                break
+    return desglose
+
+def main():
+    try:
+        monto = int(input("Monto: "))
+        monedas_input = input("Monedas (coma separadas, o Enter para 1,2,5,10,20): ")
+        monedas = [int(x.strip()) for x in monedas_input.split(',')] if monedas_input.strip() else [1, 2, 5, 10, 20]
+        desglose = cambio(monto, monedas)
+        if desglose is None:
+            print("Imposible.")
+            return
+        conteo = {}
+        for m in desglose:
+            conteo[m] = conteo.get(m, 0) + 1
+        print(f"Cambio para {monto}: {len(desglose)} monedas")
+        for m, c in sorted(conteo.items()):
+            print(f"{c} x {m}")
+    except ValueError:
+        print("Entrada inválida.")
+
+if __name__ == "__main__":
+    main()
