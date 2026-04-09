@@ -1,0 +1,25 @@
+def cambio_minimo(cambio, monedas):
+    if cambio == 0:
+        return []
+
+    mejor = None
+
+    for m in monedas:
+        if m <= cambio:
+            res = cambio_minimo(cambio - m, monedas)
+            if res is not None:
+                opcion = [m] + res
+                if mejor is None or len(opcion) < len(mejor):
+                    mejor = opcion
+
+    return mejor
+
+
+# ===== ENTRADA =====
+cambio = int(input("Ingresa el cambio: "))
+monedas = [1, 2, 5, 10,20]
+
+# ===== SALIDA =====
+resultado = cambio_minimo(cambio, monedas)
+print("Cambio total:", cambio)
+print("Monedas utilizadas:", resultado)
