@@ -1,0 +1,526 @@
+import tkinter as tk
+from tkinter import ttk
+import random
+
+# ==========================================
+# Validaciones Generales
+# ==========================================
+
+def validar_no_vacio(texto: str) -> bool:
+    """
+    Valida que el texto no esté vacío ni contenga solo espacios.
+    """
+    return bool(texto and texto.strip())
+
+def clean_text(texto: str) -> str:
+    """
+    Limpia el texto de espacios en blanco.
+    """
+    return texto.strip()
+
+def validar_texto(texto: str) -> bool:
+    """
+    Valida que el texto contenga solo letras y espacios.
+    """
+    # Al eliminar los espacios, verifica que los demás caracteres sean letras
+    return texto.replace(" ", "").isalpha()
+
+def validar_entero(texto: str) -> bool:
+    """
+    Valida que el texto sea un número entero.
+    """
+    try:
+        int (texto)
+        return True
+    except ValueError:
+        return False
+
+def validar_rango(valor: int | float, minimo, maximo) -> bool:
+    """
+    Valida que un número esté dentro de un rango.
+    """
+    return minimo <= valor <= maximo
+
+
+# ==========================================
+# Calendario de Citas
+# ==========================================
+
+# Horarios disponibles por día (True = libre, False = ocupado)
+HORARIOS_POR_DIA = {
+    "Lunes":     {"09:00": False, "10:00": True,  "11:00": False, "12:00": True,  "13:00": True,  "16:00": False, "17:00": True},
+    "Martes":    {"09:00": True,  "10:00": False,  "11:00": True,  "12:00": False, "13:00": True,  "16:00": True,  "17:00": False},
+    "Miércoles": {"09:00": False, "10:00": True,  "11:00": True,  "12:00": True,  "13:00": False, "16:00": True,  "17:00": True},
+    "Jueves":    {"09:00": True,  "10:00": True,  "11:00": False, "12:00": True,  "13:00": False, "16:00": False, "17:00": True},
+    "Viernes":   {"09:00": True,  "10:00": False,  "11:00": True,  "12:00": False, "13:00": True,  "16:00": True,  "17:00": False},
+}
+
+# Cargar citas previas desde archivo para sincronizar disponibilidad del calendario
+try:
+    with open("citas.txt", "r", encoding="utf-8") as _f:
+        for _linea in _f:
+            if _linea.strip():
+                _partes = _linea.strip().split('|')
+                if len(_partes) == 5:
+                    _, _, _, _dia, _hora = _partes
+                    if _dia in HORARIOS_POR_DIA and _hora in HORARIOS_POR_DIA[_dia]:
+                        HORARIOS_POR_DIA[_dia][_hora] = False
+except FileNotFoundError:
+    pass
+
+
+def generar_folio():
+    """Genera un número de folio único con prefijo CITA-."""
+    return f"CITA-{random.randint(10000, 99999)}"
+
+
+def seleccionar_horario(dia, hora, estado, lbl_mensaje, nombre_cliente, servicio, ventana_cal):
+    """Maneja la selección de un horario en el calendario."""
+
+    if estado == "ocupado":
+        lbl_mensaje.config(
+            fg="#EF5350",
+            text=(f"⚠  El horario {hora} del día {dia} NO tiene disponibilidad para agendar su cita. "
+                  f"Por favor elija un espacio marcado en verde.")
+        )
+        return
+
+    # ----- Horario LIBRE: registrar y mostrar confirmación -----
+    folio = generar_folio()
+
+    # Marcar el horario como ocupado en el diccionario compartido
+    HORARIOS_POR_DIA[dia][hora] = False
+
+    # Ventana modal de confirmación
+    conf = tk.Toplevel(ventana_cal)
+    conf.title("¡Cita Agendada!")
+    conf.geometry("440x300")
+    conf.configure(bg="#0D0D1A")
+    conf.resizable(False, False)
+    #conf.grab_set() #Se comentó para que no actúe como ventana modal, en caso de querer que lo haga, ya está el comando listo
+
+    tk.Label(conf, text="✅  Cita Confirmada", bg="#0D0D1A", fg="#4CAF50",
+             font=("Segoe UI", 16, "bold")).pack(pady=(28, 4))
+    tk.Label(conf, text="Su cita ha sido registrada exitosamente.",
+             bg="#0D0D1A", fg="#B0B0CC", font=("Segoe UI", 10)).pack()
+
+    info_frame = tk.Frame(conf, bg="#16213E", padx=20, pady=14)
+    info_frame.pack(fill="x", padx=30, pady=16)
+
+    datos = [
+        ("Cliente:",  nombre_cliente),
+        ("Servicio:", servicio),
+        ("Día:",      dia),
+        ("Horario:",  hora),
+        ("Folio:",    folio),
+    ]
+    for etiqueta, valor in datos:
+        fila = tk.Frame(info_frame, bg="#16213E")
+        fila.pack(fill="x", pady=2)
+        tk.Label(fila, text=etiqueta, bg="#16213E", fg="#B0B0CC",
+                 font=("Segoe UI", 10), width=10, anchor="e").pack(side="left")
+        color_valor = "#FFD700" if etiqueta == "Folio:" else "#E0E0FF"
+        tk.Label(fila, text=valor, bg="#16213E", fg=color_valor,
+                 font=("Segoe UI", 10, "bold"), anchor="w").pack(side="left", padx=6)
+
+    tk.Button(
+        conf, text="  Aceptar  ",
+        bg="#A200FF", fg="white", font=("Segoe UI", 11, "bold"),
+        relief="flat", padx=20, pady=6,
+        command=lambda: [conf.destroy(), ventana_cal.destroy()]
+    ).pack(pady=(0, 20))
+
+    print(f"\n--- CITA AGENDADA EXITOSAMENTE ---")
+    print(f"Cliente : {nombre_cliente}")
+    print(f"Servicio: {servicio}")
+    print(f"Día     : {dia}")
+    print(f"Horario : {hora}")
+    print(f"Folio   : {folio}")
+    print("----------------------------------\n")
+
+    # Guardar cita en archivo
+    try:
+        with open("citas.txt", "a", encoding="utf-8") as f:
+            f.write(f"{folio}|{nombre_cliente}|{servicio}|{dia}|{hora}\n")
+    except Exception as e:
+        print(f"Error al guardar la cita en archivo: {e}")
+
+
+def abrir_calendario(nombre_cliente, servicio):
+    """Abre la ventana emergente del calendario de citas."""
+
+    C_BG      = "#1A1A2E"
+    C_HEADER  = "#16213E"
+    C_TITLE   = "#E0E0FF"
+    C_SUB     = "#B0B0CC"
+    FONT_TITLE = ("Segoe UI", 15, "bold")
+    FONT_DAY   = ("Segoe UI", 11, "bold")
+    FONT_SLOT  = ("Segoe UI", 10)
+    FONT_BTN   = ("Segoe UI", 10, "bold")
+
+    ventana_cal = tk.Toplevel(ventana)
+    ventana_cal.title("Seleccionar Fecha y Horario")
+    ventana_cal.geometry("920x530")
+    ventana_cal.configure(bg=C_BG)
+    ventana_cal.resizable(False, False)
+    #ventana_cal.grab_set()   #Se comentó para que no actúe como ventana modal, en caso de querer que lo haga, ya está el comando listo
+
+    # ---- Encabezado ----
+    hdr = tk.Frame(ventana_cal, bg=C_HEADER, height=65)
+    hdr.pack(fill="x")
+    tk.Label(
+        hdr, text="📅  Calendario de Disponibilidad",
+        bg=C_HEADER, fg=C_TITLE, font=FONT_TITLE
+    ).place(x=20, y=12)
+    tk.Label(
+        hdr, text=f"Cliente: {nombre_cliente}  |  Servicio: {servicio}",
+        bg=C_HEADER, fg=C_SUB, font=("Segoe UI", 10)
+    ).place(x=22, y=40)
+
+    # ---- Leyenda de colores ----
+    ley = tk.Frame(ventana_cal, bg=C_BG)
+    ley.pack(fill="x", padx=20, pady=(8, 0))
+    tk.Label(ley, text="■", fg="#4CAF50", bg=C_BG, font=("Segoe UI", 13)).pack(side="left")
+    tk.Label(ley, text=" Disponible   ", fg=C_SUB, bg=C_BG, font=("Segoe UI", 10)).pack(side="left")
+    tk.Label(ley, text="■", fg="#EF5350", bg=C_BG, font=("Segoe UI", 13)).pack(side="left")
+    tk.Label(ley, text=" Ocupado", fg=C_SUB, bg=C_BG, font=("Segoe UI", 10)).pack(side="left")
+
+    # ---- Etiqueta de mensajes de estado ----
+    lbl_mensaje = tk.Label(
+        ventana_cal,
+        text="Seleccione un horario disponible para agendar su cita.",
+        bg=C_BG, fg=C_SUB, font=("Segoe UI", 10, "italic"),
+        wraplength=880, justify="left"
+    )
+    lbl_mensaje.pack(anchor="w", padx=20, pady=(6, 2))
+
+    # ---- Grid del calendario ----
+    grid_frame = tk.Frame(ventana_cal, bg=C_BG)
+    grid_frame.pack(fill="both", expand=True, padx=20, pady=8)
+
+    dias = list(HORARIOS_POR_DIA.keys())
+    horarios_globales = ["09:00", "10:00", "11:00", "12:00", "13:00", "16:00", "17:00"]
+
+    # Encabezados de días (columna 0 reservada para etiquetas de hora)
+    for col, dia in enumerate(dias):
+        tk.Label(
+            grid_frame, text=dia,
+            bg=C_HEADER, fg=C_TITLE, font=FONT_DAY,
+            width=13, relief="flat", pady=6
+        ).grid(row=0, column=col + 1, padx=3, pady=2, sticky="ew")
+
+    # Filas de horarios
+    for row, hora in enumerate(horarios_globales):
+        # Etiqueta de hora
+        tk.Label(
+            grid_frame, text=hora,
+            bg=C_BG, fg=C_SUB, font=FONT_SLOT,
+            width=6, anchor="e"
+        ).grid(row=row + 1, column=0, padx=(0, 8), pady=4, sticky="e")
+
+        for col, dia in enumerate(dias):
+            disponible = HORARIOS_POR_DIA[dia].get(hora, False)
+
+            if disponible:
+                bg_color = "#1B4332"
+                fg_color = "#4CAF50"
+                txt      = f"● {hora}"
+                estado   = "libre"
+            else:
+                bg_color = "#3D0000"
+                fg_color = "#EF5350"
+                txt      = f"✕ {hora}"
+                estado   = "ocupado"
+
+            btn = tk.Button(
+                grid_frame,
+                text=txt,
+                bg=bg_color,
+                fg=fg_color,
+                font=FONT_BTN,
+                relief="flat",
+                width=12,
+                cursor="hand2" if disponible else "arrow",
+                command=lambda d=dia, h=hora, s=estado: seleccionar_horario(
+                    d, h, s, lbl_mensaje, nombre_cliente, servicio, ventana_cal
+                )
+            )
+            btn.grid(row=row + 1, column=col + 1, padx=3, pady=3)
+
+            # Efecto hover solo en slots libres
+            if disponible:
+                btn.bind("<Enter>", lambda e, b=btn: b.config(bg="#2D6A4F"))
+                btn.bind("<Leave>", lambda e, b=btn: b.config(bg="#1B4332"))
+
+    # ---- Botón Listo ----
+    tk.Button(
+        ventana_cal, text="✔  Listo",
+        bg="#333355", fg="white", font=("Segoe UI", 10, "bold"),
+        relief="flat", padx=20, pady=6,
+        command=ventana_cal.destroy
+    ).pack(pady=(0, 12))
+
+
+# ==========================================
+# Funciones Lógicas (Fase 3)
+# ==========================================
+
+def nav_panel():
+    print("Navegando a: Panel Resumen...")
+
+def nav_citas():
+    win_citas = tk.Toplevel(ventana)
+    win_citas.title("Consultar y Eliminar Citas")
+    win_citas.geometry("650x450")
+    win_citas.configure(bg="#F2F2F2")
+    #win_citas.grab_set()  #Se comentó para que no actúe como ventana modal, en caso de querer que lo haga, ya está el comando listo
+    
+    tk.Label(win_citas, text="Citas Agendadas", bg="#F2F2F2", fg="#333333", font=("Segoe UI", 16, "bold")).pack(pady=15)
+    
+    frame_lista = tk.Frame(win_citas, bg="#FFFFFF")
+    frame_lista.pack(fill="both", expand=True, padx=25, pady=5)
+    
+    listbox = tk.Listbox(frame_lista, font=("Segoe UI", 11), selectbackground="#A200FF", selectforeground="white")
+    listbox.pack(side="left", fill="both", expand=True)
+    
+    scrollbar = tk.Scrollbar(frame_lista, orient="vertical", command=listbox.yview)
+    scrollbar.pack(side="right", fill="y")
+    listbox.config(yscrollcommand=scrollbar.set)
+    
+    def cargar_citas():
+        listbox.delete(0, tk.END)
+        try:
+            with open("citas.txt", "r", encoding="utf-8") as file:
+                for linea in file:
+                    if linea.strip():
+                        # Formato: folio|cliente|servicio|dia|hora
+                        partes = linea.strip().split('|')
+                        if len(partes) == 5:
+                            folio, cliente, servicio, dia, hora = partes
+                            listbox.insert(tk.END, f"{folio} - {cliente} - {servicio} - {dia} {hora}")
+        except FileNotFoundError:
+            pass
+
+    cargar_citas()
+    
+    def eliminar_cita():
+        seleccion = listbox.curselection()
+        if not seleccion:
+            return
+        
+        index = seleccion[0]
+        texto_item = listbox.get(index)
+        folio_a_eliminar = texto_item.split(" - ")[0]
+        
+        try:
+            lineas_restantes = []
+            with open("citas.txt", "r", encoding="utf-8") as file:
+                for linea in file:
+                    if not linea.startswith(folio_a_eliminar + "|"):
+                        lineas_restantes.append(linea)
+                    else:
+                        # Restaurar disponibilidad en el calendario (memoria)
+                        partes = linea.strip().split('|')
+                        if len(partes) == 5:
+                            _, _, _, dia, hora = partes
+                            if dia in HORARIOS_POR_DIA and hora in HORARIOS_POR_DIA[dia]:
+                                HORARIOS_POR_DIA[dia][hora] = True
+            
+            with open("citas.txt", "w", encoding="utf-8") as file:
+                file.writelines(lineas_restantes)
+            
+            cargar_citas()
+        except FileNotFoundError:
+            pass
+
+    btn_eliminar = tk.Button(win_citas, text="Eliminar Cita", bg="#EF5350", fg="white", font=("Segoe UI", 12, "bold"), relief="flat", command=eliminar_cita)
+    btn_eliminar.pack(pady=15)
+
+def nav_servicios():
+    print("Navegando a: Configurar Servicios...")
+
+def nav_ayuda():
+    lbl_ayuda = tk.Label(contenido, text="para ayuda especializada contactenos 01800-MOVILIDAD", bg=color_content, fg="#D32F2F", font=("Segoe UI", 12, "bold"))
+    lbl_ayuda.place(x=35, y=580)
+    # Hacemos que la etiqueta desaparezca despues de 6 segundos para no ensuciar la UI por siempre
+    ventana.after(6000, lbl_ayuda.destroy)
+
+def agendar_cita():
+    # Obtener los datos de las entradas
+    nombre = entrada_nombre.get()
+    contacto = entrada_contacto.get()
+    servicio = tipo_servicio.get()
+    obs = caja_observaciones.get("1.0", "end-1c")
+
+    # Validacion basica
+    if not validar_no_vacio(nombre):
+        print("ERROR: el campo Nombre es obligatorio.")
+    elif not validar_no_vacio(contacto):
+        print("ERROR: el campo Teléfono de contacto es obligatorio.")
+    elif not validar_no_vacio(servicio):
+        print("ERROR: el campo Tipo de servicio es obligatorio.")
+    elif not validar_texto(nombre):
+        print("ERROR: El nombre solo debe contener letras.")
+        entrada_nombre.delete(0, "end")  # limpia el Entry
+    elif not validar_entero(contacto):
+        print("ERROR: El teléfono de contacto no debe contener letras ni puntos.")
+        entrada_contacto.delete(0, "end")  # limpia el Entry
+    else:
+        # Imprimir datos
+        print("\n--- NUEVO REGISTRO DE CITA EXITOSO ---")
+        print("Nombre del solicitante: " + nombre)
+        print("Telefono de contacto: " + contacto)
+        print("Tipo de Servicio: " + servicio)
+        
+        # Verificar qué documentos se marcaron
+        documentos = ""
+        if var_ine.get() == 1:
+            documentos = documentos + "[INE] "
+        if var_domicilio.get() == 1:
+            documentos = documentos + "[Comprobante de Domicilio] "
+        if var_tarjeta.get() == 1:
+            documentos = documentos + "[Tarjeta de Circulacion] "
+        if var_multa.get() == 1:
+            documentos = documentos + "[Certificado No Multas] "
+
+        # Si no se selecciono ningun documento
+        if documentos == "":
+            documentos = "Ninguno presentado"
+
+        print("Documentacion: " + documentos)
+        print("Observaciones: " + obs)
+        print("--------------------------------------\n")
+
+        # Limpiar el formulario para un nuevo registro
+        entrada_nombre.delete(0, "end")
+        entrada_contacto.delete(0, "end")
+        tipo_servicio.set("")
+        var_ine.set(0)
+        var_domicilio.set(0)
+        var_tarjeta.set(0)
+        var_multa.set(0)
+        caja_observaciones.delete("1.0", "end")
+
+        # Abrir el calendario para elegir fecha y horario
+        abrir_calendario(nombre, servicio)
+
+
+# ==========================================
+# Ventana principal - Gestión de Citas 
+# ==========================================
+ventana = tk.Tk()
+ventana.title("Sistema de Gestión de Citas - (Citas y Trámites)")
+ventana.geometry("1376x768")
+ventana.configure(bg="#F2F2F2")
+
+color_header = "#2992BB" 
+color_menu = "#7C4CFF"   
+color_button = "#A200FF" 
+color_content = "#FFFFFF"
+color_text_main = "#333333"
+
+# ==========================================
+# Encabezado (Header) 
+# ==========================================
+encabezado = tk.Frame(ventana, bg=color_header, height=75)
+encabezado.pack(fill="x")
+
+titulo = tk.Label(encabezado, text="SISTEMA DE GESTIÓN DE CITAS", bg=color_header, fg="white", font=("Segoe UI", 21, "bold"))
+titulo.place(x=25, y=20)
+
+# ==========================================
+# Menú lateral (Navegación)
+# ==========================================
+menu = tk.Frame(ventana, bg=color_menu, width=220)
+menu.pack(side="left", fill="y")
+
+# Se agrega el atributo 'command' a cada botón para enlazarlo con su función
+btn_dash = tk.Button(menu, text="Agendar Cita", bg=color_menu, fg="white", relief="flat", font=("Segoe UI", 12), command=nav_panel)
+btn_dash.pack(fill="x", pady=10)
+
+btn_citas = tk.Button(menu, text="Consultar Citas", bg=color_menu, fg="white", relief="flat", font=("Segoe UI", 12), command=nav_citas)
+btn_citas.pack(fill="x", pady=10)
+
+btn_ayuda = tk.Button(menu, text="Ayuda", bg=color_menu, fg="white", relief="flat", font=("Segoe UI", 12), command=nav_ayuda)
+btn_ayuda.pack(fill="x", pady=10)
+
+btn_salir = tk.Button(menu, text="Salir", bg="#D32F2F", fg="white", relief="flat", font=("Segoe UI", 12, "bold"), command=ventana.destroy)
+btn_salir.pack(fill="x", pady=10)
+
+
+# ==========================================
+# Área de contenido principal
+# ==========================================
+contenido = tk.Frame(ventana, bg=color_content)
+contenido.pack(side="left", fill="both", expand=True)
+
+titulo_seccion = tk.Label(contenido, text="Registro de Nueva Cita", bg=color_content, fg=color_text_main, font=("Segoe UI", 18, "bold"))
+titulo_seccion.place(x=35, y=25)
+
+# ==========================================
+# Widgets del formulario de cita
+# ==========================================
+
+lbl_nombre = tk.Label(contenido, text="Nombre Completo del Solicitante:", bg=color_content, font=("Segoe UI", 12))
+lbl_nombre.place(x=35, y=85)
+
+entrada_nombre = tk.Entry(contenido, width=40, font=("Segoe UI", 11))
+entrada_nombre.place(x=300, y=85)
+
+lbl_contacto = tk.Label(contenido, text="Teléfono de Contacto:", bg=color_content, font=("Segoe UI", 12))
+lbl_contacto.place(x=35, y=125)
+
+entrada_contacto = tk.Entry(contenido, width=40, font=("Segoe UI", 11))
+entrada_contacto.place(x=210, y=125)
+
+lbl_servicio = tk.Label(contenido, text="Tipo de Servicio Solicitado:", bg=color_content, font=("Segoe UI", 12))
+lbl_servicio.place(x=35, y=175)
+
+tipo_servicio = tk.StringVar()
+rb_licencia = tk.Radiobutton(contenido, text="Alta de unidad transporte Pub.", variable=tipo_servicio, value="Alta Unidad", bg=color_content, font=("Segoe UI", 11))
+rb_licencia.place(x=260, y=175)
+
+rb_verificacion = tk.Radiobutton(contenido, text="Holograma para prestar servicio", variable=tipo_servicio, value="Holograma", bg=color_content, font=("Segoe UI", 11))
+rb_verificacion.place(x=495, y=210)
+
+rb_multa = tk.Radiobutton(contenido, text="Multas e Impugnaciones", variable=tipo_servicio, value="Multas", bg=color_content, font=("Segoe UI", 11))
+rb_multa.place(x=510, y=175)
+
+rb_placas = tk.Radiobutton(contenido, text="Tarjeta de Tarifa Preferencial", variable=tipo_servicio, value="Tarifa Preferencial", bg=color_content, font=("Segoe UI", 11))
+rb_placas.place(x=260, y=210)
+
+lbl_documentos = tk.Label(contenido, text="Documentación Presentada (marque las que apliquen):", bg=color_content, font=("Segoe UI", 12))
+lbl_documentos.place(x=35, y=255)
+
+# Variables de control para los Checkbuttons
+var_ine = tk.IntVar()
+var_domicilio = tk.IntVar()
+var_tarjeta = tk.IntVar()
+var_multa = tk.IntVar()
+
+chk_ine = tk.Checkbutton(contenido, text="Identificación Oficial (INE)", variable=var_ine, bg=color_content, font=("Segoe UI", 11))
+chk_ine.place(x=35, y=290)
+
+chk_domicilio = tk.Checkbutton(contenido, text="Comprobante de Domicilio", variable=var_domicilio, bg=color_content, font=("Segoe UI", 11))
+chk_domicilio.place(x=250, y=290)
+
+chk_tarjeta = tk.Checkbutton(contenido, text="Tarjeta de Circulación (si aplica)", variable=var_tarjeta, bg=color_content, font=("Segoe UI", 11))
+chk_tarjeta.place(x=470, y=290)
+
+chk_multa = tk.Checkbutton(contenido, text="Certificado de No Multas (si aplica)", variable=var_multa, bg=color_content, font=("Segoe UI", 11))
+chk_multa.place(x=35, y=325)
+
+lbl_observaciones = tk.Label(contenido, text="Detalles Adicionales y Observaciones:", bg=color_content, font=("Segoe UI", 12))
+lbl_observaciones.place(x=35, y=370)
+
+caja_observaciones = tk.Text(contenido, width=65, height=8, font=("Segoe UI", 11), bd=2, relief="solid")
+caja_observaciones.place(x=35, y=400)
+
+# Botón enlazado a la función agendar_cita
+btn_agendar = tk.Button(contenido, text="Agendar Cita", bg=color_button, fg="white", font=("Segoe UI", 13, "bold"), width=25, command=agendar_cita)
+btn_agendar.place(x=600, y=535)
+
+# ==========================================
+# Fin de la estructura de la interfaz
+# ==========================================
+ventana.mainloop()
