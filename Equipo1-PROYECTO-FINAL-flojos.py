@@ -5,6 +5,7 @@
 """
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
+import json
 
 # ==========================================
 # Clases de datos
@@ -27,11 +28,29 @@ class Incidencia(Item):
         return f"ID: {self.id}, Descripción: {self.descripcion}, Estado: {self.estado}"
 
 # ==========================================
+# Funciones de persistencia
+# ==========================================
+def guardar_datos(tipo, items):
+    with open(f"{tipo}s.json", "w") as f:
+        json.dump([item.__dict__ for item in items], f, indent=4)
+
+def cargar_datos(tipo):
+    try:
+        with open(f"{tipo}s.json", "r") as f:
+            data = json.load(f)
+            if tipo == "incidencia":
+                return [Incidencia(d['id'], d['descripcion'], d['estado']) for d in data]
+            else:
+                return [Item(d['id'], d['nombre'], d['descripcion']) for d in data]
+    except FileNotFoundError:
+        return []
+
+# ==========================================
 # Base de datos en memoria
 # ==========================================
-concesiones = []
-permisos = []
-incidencias = []
+concesiones = cargar_datos("concesion")
+permisos = cargar_datos("permiso")
+incidencias = cargar_datos("incidencia")
 
 # ==========================================
 # Funciones de gestión
@@ -39,12 +58,14 @@ incidencias = []
 def agregar_item(items, tipo, id_val, nombre, descripcion):
     item = Item(id_val, nombre, descripcion) if tipo != "incidencia" else Incidencia(id_val, descripcion)
     items.append(item)
+    guardar_datos(tipo, items)
     return f"{tipo.capitalize()} agregado exitosamente."
 
 def eliminar_item(items, tipo, id_val):
     for item in items:
         if item.id == id_val:
             items.remove(item)
+            guardar_datos(tipo, items)
             return f"{tipo.capitalize()} eliminado exitosamente."
     return f"{tipo.capitalize()} no encontrado."
 
@@ -58,6 +79,7 @@ def actualizar_estado_incidencia(id_val, nuevo_estado):
     for i in incidencias:
         if i.id == id_val:
             i.estado = nuevo_estado
+            guardar_datos("incidencia", incidencias)
             return "Estado actualizado exitosamente."
     return "Incidencia no encontrada."
 
