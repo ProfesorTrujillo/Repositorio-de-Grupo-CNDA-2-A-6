@@ -94,7 +94,7 @@ def seleccionar_horario(dia, hora, estado, lbl_mensaje, nombre_cliente, servicio
     # Ventana modal de confirmación
     conf = tk.Toplevel(ventana_cal)
     conf.title("¡Cita Agendada!")
-    conf.geometry("440x300")
+    conf.geometry("450x400")
     conf.configure(bg="#0D0D1A")
     conf.resizable(False, False)
     #conf.grab_set() #Se comentó para que no actúe como ventana modal, en caso de querer que lo haga, ya está el comando listo
@@ -123,11 +123,15 @@ def seleccionar_horario(dia, hora, estado, lbl_mensaje, nombre_cliente, servicio
         tk.Label(fila, text=valor, bg="#16213E", fg=color_valor,
                  font=("Segoe UI", 10, "bold"), anchor="w").pack(side="left", padx=6)
 
+    def cerrar_ventanas():
+        conf.destroy()
+        ventana_cal.destroy()
+
     tk.Button(
-        conf, text="  Aceptar  ",
+        conf, text="✔  Listo",
         bg="#A200FF", fg="white", font=("Segoe UI", 11, "bold"),
         relief="flat", padx=20, pady=6,
-        command=lambda: [conf.destroy(), ventana_cal.destroy()]
+        command=cerrar_ventanas
     ).pack(pady=(0, 20))
 
     print(f"\n--- CITA AGENDADA EXITOSAMENTE ---")
@@ -352,17 +356,39 @@ def agendar_cita():
     servicio = tipo_servicio.get()
     obs = caja_observaciones.get("1.0", "end-1c")
 
+    def mostrar_error(mensaje):
+        lbl_error = tk.Label(contenido, text=mensaje, bg=color_content, fg="#D32F2F", font=("Segoe UI", 12, "bold"))
+        lbl_error.place(x=35, y=580)
+        ventana.after(6000, lbl_error.destroy)
+
+    # Verificar qué documentos se marcaron
+    documentos = ""
+    if var_ine.get() == 1:
+        documentos = documentos + "[INE] "
+    if var_domicilio.get() == 1:
+        documentos = documentos + "[Comprobante de Domicilio] "
+    if var_tarjeta.get() == 1:
+        documentos = documentos + "[Tarjeta de Circulacion] "
+    if var_multa.get() == 1:
+        documentos = documentos + "[Certificado No Multas] "
+
     # Validacion basica
     if not validar_no_vacio(nombre):
+        mostrar_error("error: el campo Nombre es obligatorio.")
         print("ERROR: el campo Nombre es obligatorio.")
     elif not validar_no_vacio(contacto):
+        mostrar_error("error: el campo Teléfono de contacto es obligatorio.")
         print("ERROR: el campo Teléfono de contacto es obligatorio.")
     elif not validar_no_vacio(servicio):
-        print("ERROR: el campo Tipo de servicio es obligatorio.")
+        mostrar_error("error: tienes que seleccionar un tipo de servicio para agendar la cita")
+    elif documentos == "":
+        mostrar_error("error: tienes que seleccionar al menos un documento a presentar para agendar la cita")
     elif not validar_texto(nombre):
+        mostrar_error("error: El nombre solo debe contener letras.")
         print("ERROR: El nombre solo debe contener letras.")
         entrada_nombre.delete(0, "end")  # limpia el Entry
     elif not validar_entero(contacto):
+        mostrar_error("error: El teléfono de contacto no debe contener letras ni puntos.")
         print("ERROR: El teléfono de contacto no debe contener letras ni puntos.")
         entrada_contacto.delete(0, "end")  # limpia el Entry
     else:
@@ -371,22 +397,6 @@ def agendar_cita():
         print("Nombre del solicitante: " + nombre)
         print("Telefono de contacto: " + contacto)
         print("Tipo de Servicio: " + servicio)
-        
-        # Verificar qué documentos se marcaron
-        documentos = ""
-        if var_ine.get() == 1:
-            documentos = documentos + "[INE] "
-        if var_domicilio.get() == 1:
-            documentos = documentos + "[Comprobante de Domicilio] "
-        if var_tarjeta.get() == 1:
-            documentos = documentos + "[Tarjeta de Circulacion] "
-        if var_multa.get() == 1:
-            documentos = documentos + "[Certificado No Multas] "
-
-        # Si no se selecciono ningun documento
-        if documentos == "":
-            documentos = "Ninguno presentado"
-
         print("Documentacion: " + documentos)
         print("Observaciones: " + obs)
         print("--------------------------------------\n")
