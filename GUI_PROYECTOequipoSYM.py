@@ -1,147 +1,177 @@
 import tkinter as tk
 from tkinter import messagebox
+import random
 
-# Crear ventana principal
+# ==========================================
+# Base de datos (diccionario)
+# ==========================================
+quejas = {}
+
+# ==========================================
+# Ventana principal
+# ==========================================
 ventana = tk.Tk()
-ventana.title("Sistema de Transporte Público - Aguascalientes")
-ventana.geometry("600x500")
-ventana.configure(bg="#f2f2f2")
+ventana.title("Sistema de Quejas - Autobuses")
+ventana.geometry("900x550")
+ventana.configure(bg="#EAF4F4")
 
-# -------- FUNCIONES --------
-def guardar_demanda():
-    nombre = entry_nombre.get()
-    ruta = entry_ruta.get()
-    pasajeros = entry_pasajeros.get()
-    horario = entry_horario.get()
+# Colores
+color_header = "#4A90E2"
+color_menu = "#A7C7E7"
+color_button = "#5DADE2"
+color_content = "#FFFFFF"
 
-    if nombre and ruta and pasajeros and horario:
-        messagebox.showinfo("Registro exitoso", "Demanda registrada correctamente")
-        limpiar_campos()
-    else:
+# ==========================================
+# Funciones
+# ==========================================
+def generar_folio():
+    return f"FOL-{random.randint(1000,9999)}"
+
+def guardar_queja():
+    nombre = entrada_nombre.get()
+    correo = entrada_correo.get()
+    ruta = entrada_ruta.get()
+    tipo = tipo_queja.get()
+    comentario = caja_comentarios.get("1.0", tk.END).strip()
+
+    if not nombre or not correo or not ruta or not tipo or not comentario:
         messagebox.showwarning("Error", "Completa todos los campos")
+        return
 
-def enviar_queja():
-    texto = txt_quejas.get("1.0", tk.END)
-    if texto.strip():
-        messagebox.showinfo("Enviado", "Tu comentario fue enviado")
-        txt_quejas.delete("1.0", tk.END)
-    else:
-        messagebox.showwarning("Error", "Escribe una queja o sugerencia")
+    folio = generar_folio()
 
-def limpiar_campos():
-    entry_nombre.delete(0, tk.END)
-    entry_ruta.delete(0, tk.END)
-    entry_pasajeros.delete(0, tk.END)
-    entry_horario.delete(0, tk.END)
+    # Guardar datos
+    quejas[folio] = {
+        "nombre": nombre,
+        "correo": correo,
+        "ruta": ruta,
+        "tipo": tipo,
+        "comentario": comentario
+    }
 
-def salir():
-    ventana.quit()
+    messagebox.showinfo("Queja registrada", f"Folio generado:\n{folio}")
 
-# -------- TITULO --------
-titulo = tk.Label(
-    ventana, 
-    text="Sistema de Transporte Público", 
-    font=("Arial", 16, "bold"), 
-    bg="#f2f2f2",
-    fg="#333"
-)
-titulo.pack(pady=10)
+    # Limpiar
+    entrada_nombre.delete(0, tk.END)
+    entrada_correo.delete(0, tk.END)
+    entrada_ruta.delete(0, tk.END)
+    caja_comentarios.delete("1.0", tk.END)
 
-# -------- FRAME REGISTRO --------
-frame_registro = tk.LabelFrame(
-    ventana, 
-    text="Registro de Demanda", 
-    bg="#f2f2f2",
-    fg="#333",
-    padx=10, 
-    pady=10
-)
-frame_registro.pack(padx=20, pady=10, fill="both")
+# ==========================================
+# RECURSIVIDAD
+# ==========================================
+def buscar_folio_recursivo(lista, folio, indice=0):
+    # Caso base: no encontrado
+    if indice >= len(lista):
+        return None
 
-tk.Label(frame_registro, text="Nombre:", bg="#f2f2f2").grid(row=0, column=0, sticky="w")
-entry_nombre = tk.Entry(frame_registro)
-entry_nombre.grid(row=0, column=1)
+    # Caso base: encontrado
+    if lista[indice][0] == folio:
+        return lista[indice][1]
 
-tk.Label(frame_registro, text="Ruta:", bg="#f2f2f2").grid(row=1, column=0, sticky="w")
-entry_ruta = tk.Entry(frame_registro)
-entry_ruta.grid(row=1, column=1)
+    # Llamada recursiva
+    return buscar_folio_recursivo(lista, folio, indice + 1)
 
-tk.Label(frame_registro, text="Pasajeros:", bg="#f2f2f2").grid(row=2, column=0, sticky="w")
-entry_pasajeros = tk.Entry(frame_registro)
-entry_pasajeros.grid(row=2, column=1)
+# ==========================================
+# CONSULTAR FOLIO
+# ==========================================
+def consultar_folio():
+    ventana_consulta = tk.Toplevel()
+    ventana_consulta.title("Consultar Folio")
+    ventana_consulta.geometry("400x350")
 
-tk.Label(frame_registro, text="Horario:", bg="#f2f2f2").grid(row=3, column=0, sticky="w")
-entry_horario = tk.Entry(frame_registro)
-entry_horario.grid(row=3, column=1)
+    tk.Label(ventana_consulta, text="Ingresa tu folio:").pack(pady=10)
 
-btn_guardar = tk.Button(
-    frame_registro, 
-    text="Guardar", 
-    command=guardar_demanda,
-    bg="#cccccc"
-)
-btn_guardar.grid(row=4, column=0, pady=10)
+    entrada_folio = tk.Entry(ventana_consulta)
+    entrada_folio.pack(pady=5)
 
-btn_limpiar = tk.Button(
-    frame_registro, 
-    text="Limpiar", 
-    command=limpiar_campos,
-    bg="#cccccc"
-)
-btn_limpiar.grid(row=4, column=1)
+    resultado = tk.Text(ventana_consulta, height=12, width=40)
+    resultado.pack(pady=10)
 
-# -------- FRAME RUTAS --------
-frame_rutas = tk.LabelFrame(
-    ventana, 
-    text="Rutas y Horarios", 
-    bg="#f2f2f2",
-    fg="#333",
-    padx=10, 
-    pady=10
-)
-frame_rutas.pack(padx=20, pady=10, fill="both")
+    def buscar():
+        folio = entrada_folio.get()
+        resultado.delete("1.0", tk.END)
 
-info_rutas = tk.Label(
-    frame_rutas,
-    text="Ruta 1: Centro - Norte | 6:00 - 22:00\n"
-         "Ruta 2: Sur - Centro | 5:30 - 21:30\n"
-         "Ruta 3: Oriente - Poniente | 6:15 - 22:15",
-    bg="#f2f2f2",
-    justify="left"
-)
-info_rutas.pack()
+        lista = list(quejas.items())
+        datos = buscar_folio_recursivo(lista, folio)
 
-# -------- FRAME QUEJAS --------
-frame_quejas = tk.LabelFrame(
-    ventana, 
-    text="Quejas y Sugerencias", 
-    bg="#f2f2f2",
-    fg="#333",
-    padx=10, 
-    pady=10
-)
-frame_quejas.pack(padx=20, pady=10, fill="both")
+        if datos:
+            info = f"""
+Nombre: {datos['nombre']}
+Correo: {datos['correo']}
+Ruta: {datos['ruta']}
+Tipo: {datos['tipo']}
+Comentario: {datos['comentario']}
+"""
+            resultado.insert(tk.END, info)
+        else:
+            resultado.insert(tk.END, "Folio no encontrado")
 
-txt_quejas = tk.Text(frame_quejas, height=4)
-txt_quejas.pack()
+    tk.Button(ventana_consulta, text="Buscar", command=buscar).pack()
 
-btn_enviar = tk.Button(
-    frame_quejas, 
-    text="Enviar", 
-    command=enviar_queja,
-    bg="#cccccc"
-)
-btn_enviar.pack(pady=5)
+# ==========================================
+# Encabezado
+# ==========================================
+encabezado = tk.Frame(ventana, bg=color_header, height=70)
+encabezado.pack(fill="x")
 
-# -------- BOTON SALIR --------
-btn_salir = tk.Button(
-    ventana, 
-    text="Salir", 
-    command=salir,
-    bg="#999999",
-    fg="white"
-)
-btn_salir.pack(pady=10)
+titulo = tk.Label(encabezado, text="Sistema de Quejas - Servicio de Autobuses", 
+                  bg=color_header, fg="white", font=("Segoe UI", 18, "bold"))
+titulo.place(x=20, y=15)
 
-# Ejecutar ventana
+# ==========================================
+# Menú lateral
+# ==========================================
+menu = tk.Frame(ventana, bg=color_menu, width=200)
+menu.pack(side="left", fill="y")
+
+tk.Button(menu, text="Registrar Queja", bg=color_menu, fg="black",
+          relief="flat", font=("Segoe UI", 12)).pack(fill="x", pady=10)
+
+tk.Button(menu, text="Consultar Folio", bg=color_menu, fg="black",
+          relief="flat", font=("Segoe UI", 12),
+          command=consultar_folio).pack(fill="x", pady=10)
+
+# ==========================================
+# Área de contenido
+# ==========================================
+contenido = tk.Frame(ventana, bg=color_content)
+contenido.pack(side="left", fill="both", expand=True)
+
+titulo_seccion = tk.Label(contenido, text="Formulario de Quejas", 
+                          bg=color_content, fg="#333", font=("Segoe UI", 16, "bold"))
+titulo_seccion.place(x=30, y=20)
+
+# ==========================================
+# Formulario
+# ==========================================
+tk.Label(contenido, text="Nombre:", bg=color_content, font=("Segoe UI", 12)).place(x=30, y=80)
+entrada_nombre = tk.Entry(contenido, width=30, font=("Segoe UI", 11))
+entrada_nombre.place(x=150, y=80)
+
+tk.Label(contenido, text="Correo:", bg=color_content, font=("Segoe UI", 12)).place(x=30, y=120)
+entrada_correo = tk.Entry(contenido, width=30, font=("Segoe UI", 11))
+entrada_correo.place(x=150, y=120)
+
+tk.Label(contenido, text="Ruta:", bg=color_content, font=("Segoe UI", 12)).place(x=30, y=160)
+entrada_ruta = tk.Entry(contenido, width=30, font=("Segoe UI", 11))
+entrada_ruta.place(x=150, y=160)
+
+tk.Label(contenido, text="Tipo de queja:", bg=color_content, font=("Segoe UI", 12)).place(x=30, y=200)
+
+tipo_queja = tk.StringVar()
+tk.Radiobutton(contenido, text="Retraso", variable=tipo_queja, value="Retraso", bg=color_content).place(x=150, y=200)
+tk.Radiobutton(contenido, text="Mal servicio", variable=tipo_queja, value="Mal servicio", bg=color_content).place(x=230, y=200)
+tk.Radiobutton(contenido, text="Condiciones", variable=tipo_queja, value="Condiciones", bg=color_content).place(x=350, y=200)
+
+tk.Label(contenido, text="Descripción de la queja:", bg=color_content, font=("Segoe UI", 12)).place(x=30, y=250)
+
+caja_comentarios = tk.Text(contenido, width=50, height=6, font=("Segoe UI", 11), bd=2)
+caja_comentarios.place(x=30, y=280)
+
+tk.Button(contenido, text="Registrar Queja", bg=color_button, fg="white",
+          font=("Segoe UI", 12, "bold"), width=20,
+          command=guardar_queja).place(x=300, y=430)
+
+# ==========================================
 ventana.mainloop()
