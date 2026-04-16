@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import time # Importo la librería necesaria para gestionar los tiempos 
+import os
 
 # Se define la configuración global de las rutas disponibles en el sistema
 # Se utiliza como base la información de los recorridos con origen en la Universidad Tecnológica de Aguascalientes
@@ -16,13 +17,23 @@ def salir_sistema():
     """Cierra la aplicación por completo."""
     ventana.destroy()
 
+def cargar_historial():
+    """Lee el archivo de texto y carga los comentarios previos en la lista visual."""
+    if os.path.exists("sugerencias.txt"):
+        with open("sugerencias.txt", "r", encoding="utf-8") as archivo:
+            for linea in archivo:
+                lista_comentarios.insert(tk.END, linea.strip())
+
 def guardar_comentario():
     comentario = caja_comentarios.get("1.0", tk.END).strip()
     if comentario:
-        # Se genera una marca de tiempo para el registro anónimo
-        registro = f"[{time.strftime('%H:%M:%S')}] Anónimo: {comentario}"
+        registro = f"[{time.strftime('%d/%m/%Y %H:%M')}] Anónimo: {comentario}"
         
-        # Se inserta el comentario en la lista visual (la memoria del sistema)
+        # Se guarda físicamente en el archivo para mantener la memoria tras cerrar el programa
+        with open("sugerencias.txt", "a", encoding="utf-8") as archivo:
+            archivo.write(registro + "\n")
+        
+        # Se actualiza la lista visual inmediatamente
         lista_comentarios.insert(tk.END, registro)
         
         messagebox.showinfo("Comentario Guardado", "Gracias por ayudar a brindar un mejor servicio")
@@ -87,7 +98,6 @@ def iniciar_monitoreo():
     
     for p in range(1, total + 1):
         faltantes, tiempo = calcular_aproximacion(p, total, base)
-        
         lbl_camion.config(text=f"UBICACIÓN ACTUAL DEL CAMIÓN: PARADA {p}")
         
         if p < total:
@@ -100,7 +110,7 @@ def iniciar_monitoreo():
         ventana.update()
         sincronizar_gps(0.4) 
 
-    messagebox.showinfo("Viaje Finalizado", f"Has llegado al final de la {ruta_seleccionada}.\n¿Deseas consultar otra ruta?")
+    messagebox.showinfo("Viaje Finalizado", f"Has llegado al final de la {ruta_seleccionada}.")
     combo.config(state="readonly")
     btn_iniciar_ruta.config(state="normal", text="Monitorear otra ruta")
 
@@ -112,24 +122,24 @@ ventana.configure(bg="#9BB7CC")
 
 color_header, color_menu, color_content, color_accent = "#2F4156", "#567C8D", "#519FA1", "#FFFFFF"
 
-# --- Encabezado ---
+# Encabezado
 encabezado = tk.Frame(ventana, bg=color_header, height=80)
 encabezado.pack(fill="x")
 tk.Label(encabezado, text="TIC-TAC RUTA", bg=color_header, fg=color_accent, font=("Segoe UI", 22, "bold")).place(x=20, y=20)
 tk.Label(encabezado, text="Coordinación General de Movilidad - Aguascalientes", bg=color_header, fg="#F5EFEB", font=("Segoe UI", 10, "italic")).place(x=25, y=55)
 
-# --- Menú Lateral ---
+# Menú Lateral
 menu = tk.Frame(ventana, bg=color_menu, width=200)
 menu.pack(side="left", fill="y")
 tk.Button(menu, text="Panel de Control", bg=color_menu, fg="white", relief="flat", font=("Segoe UI", 11), command=mostrar_panel_control).pack(fill="x", pady=20, padx=10)
 tk.Button(menu, text="Soporte Técnico", bg=color_menu, fg="white", relief="flat", font=("Segoe UI", 11), command=mostrar_soporte).pack(fill="x", pady=10, padx=10)
 tk.Button(menu, text="Salir del Sistema", bg="#D32F2F", fg="white", relief="flat", font=("Segoe UI", 11, "bold"), command=salir_sistema).pack(side="bottom", fill="x", pady=20, padx=10)
 
-# --- Contenedor Principal ---
+# Contenido Principal
 contenido = tk.Frame(ventana, bg=color_content)
 contenido.pack(side="left", fill="both", expand=True, padx=30, pady=30)
 
-# --- PANEL DE CONTROL ---
+# PANEL DE CONTROL
 lf_acceso = tk.LabelFrame(contenido, bg=color_content, borderwidth=0)
 lf_acceso.pack(fill="x", padx=10, pady=5)
 tk.Label(lf_acceso, text="Ingrese su ID de Usuario (6 dígitos):", bg=color_content, font=("Segoe UI", 11), fg=color_accent).grid(row=0, column=0, padx=20, pady=20)
@@ -155,27 +165,29 @@ lbl_paradas.place(x=30, y=140)
 lbl_tiempo = tk.Label(lf_monitoreo, text="TIEMPO ESTIMADO: --", bg="#BCDBFF", fg="#0CA4BF", font=("Segoe UI", 12, "bold"), width=60, pady=10)
 lbl_tiempo.place(x=30, y=200)
 
-# --- PANEL DE SOPORTE (MEMORIA DE COMENTARIOS) ---
+# PANEL DE SOPORTE (CON COMENTARIOS DE LOS USUARIOS)
 lf_soporte = tk.LabelFrame(contenido, bg=color_content, borderwidth=0)
 tk.Label(lf_soporte, text="ATENCIÓN CIUDADANA / BUZÓN DE QUEJAS", bg=color_header, fg="white", font=("Segoe UI", 14, "bold"), pady=10).pack(fill="x", pady=10)
 
 tk.Label(lf_soporte, text="Escribe tu sugerencia aquí:", bg=color_content, fg="white", font=("Segoe UI", 10)).pack(anchor="w", padx=20)
-caja_comentarios = tk.Text(lf_soporte, height=4, width=60, font=("Segoe UI", 10))
+caja_comentarios = tk.Text(lf_soporte, height=3, width=60, font=("Segoe UI", 10))
 caja_comentarios.pack(pady=5)
 
 tk.Button(lf_soporte, text="Enviar Sugerencia", bg="#4CAF50", fg="white", font=("Segoe UI", 10, "bold"), command=guardar_comentario).pack(pady=5)
 
-# Registro visual de comentarios (La Memoria)
-tk.Label(lf_soporte, text="Historial de Comentarios del Sistema:", bg=color_content, fg="white", font=("Segoe UI", 10, "bold")).pack(anchor="w", padx=20, pady=(10, 0))
+tk.Label(lf_soporte, text="Comentarios de los Usuarios:", bg=color_content, fg="white", font=("Segoe UI", 10, "bold")).pack(anchor="w", padx=20, pady=(10, 0))
 frame_lista = tk.Frame(lf_soporte, bg=color_content)
 frame_lista.pack(fill="both", expand=True, padx=20, pady=5)
 
 scroll = tk.Scrollbar(frame_lista)
 scroll.pack(side="right", fill="y")
 
-lista_comentarios = tk.Listbox(frame_lista, height=6, font=("Segoe UI", 9), yscrollcommand=scroll.set)
+lista_comentarios = tk.Listbox(frame_lista, height=5, font=("Segoe UI", 9), yscrollcommand=scroll.set)
 lista_comentarios.pack(fill="both", expand=True)
 scroll.config(command=lista_comentarios.yview)
+
+# Cargar el historial al iniciar
+cargar_historial()
 
 tk.Button(lf_soporte, text="Cerrar Aplicación", bg="#D32F2F", fg="white", font=("Segoe UI", 10, "bold"), command=salir_sistema).pack(pady=10)
 
