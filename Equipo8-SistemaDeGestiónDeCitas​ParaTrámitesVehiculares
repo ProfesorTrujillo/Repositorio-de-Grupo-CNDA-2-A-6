@@ -69,9 +69,31 @@ except FileNotFoundError:
     pass
 
 
-def generar_folio():
-    """Genera un número de folio único con prefijo CITA-."""
-    return f"CITA-{random.randint(10000, 99999)}"
+def generar_folio(folios_existentes=None):
+    """
+    Genera un número de folio único con prefijo CITA- usando RECURSIVIDAD.
+    Verifica que el folio no exista previamente en el archivo.
+    """
+    if folios_existentes is None:
+        folios_existentes = set()
+        try:
+            with open("citas.txt", "r", encoding="utf-8") as f:
+                for linea in f:
+                    if linea.strip():
+                        partes = linea.strip().split('|')
+                        if len(partes) > 0:
+                            folios_existentes.add(partes[0])
+        except FileNotFoundError:
+            pass
+
+    nuevo_folio = f"CITA-{random.randint(10000, 99999)}"
+
+    # Caso Base: El folio no está repetido, se retorna.
+    if nuevo_folio not in folios_existentes:
+        return nuevo_folio
+    
+    # Paso Recursivo: Si el folio ya existe, la función se llama a sí misma.
+    return generar_folio(folios_existentes)
 
 
 def seleccionar_horario(dia, hora, estado, lbl_mensaje, nombre_cliente, servicio, ventana_cal):
